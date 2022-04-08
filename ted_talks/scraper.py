@@ -45,7 +45,7 @@ class TEDScraper:
         """
         try:
             with urlopen(url) as res:
-                # print("[DEBUG] in make_soup() : Found: {}".format(url))
+                print("[DEBUG] in make_soup() : Found: {}".format(url))
                 html = res.read()
 
         except HTTPError as e:
@@ -63,6 +63,7 @@ class TEDScraper:
         :rtype list
         """
         soup = TEDScraper.make_soup(TEDScraper.LANG_URL)
+
         lang_div = soup.find_all("div", {"class": "languages__list__language"})
 
         lang_info = []
@@ -74,7 +75,7 @@ class TEDScraper:
             lang_talks = re.match("\d*", lang_talks)
             lang_talks = lang_talks.group()
 
-            # print("[DEBUG] get_language lang type: {:25} symbol: {:5} {}".format(lang_type, lang_symbol, lang_talks))
+            print("[DEBUG] get_language lang type: {:25} symbol: {:5} {}".format(lang_type, lang_symbol, lang_talks))
 
             lang_info.append(
                 {"lang_type": lang_type, "lang_symbol": lang_symbol, "lang_talks": lang_talks})
@@ -127,7 +128,7 @@ class TEDScraper:
                 title_list = self.get_talk_titles(soup)
 
                 all_talk_titles.append(title_list)
-                # time.sleep(1)
+                time.sleep(5)
 
         return all_talk_titles
 
@@ -158,7 +159,7 @@ class TEDScraper:
                 soup = TEDScraper.make_soup(atl)
                 posted_date = self.get_talk_posted_date(soup)
                 all_talk_posted_date.append(posted_date)
-                # time.sleep(1)
+                time.sleep(5)
 
         return all_talk_posted_date
 
@@ -201,7 +202,7 @@ class TEDScraper:
             print("         {}".format(next_link))
 
             target_url = next_link
-            # time.sleep(1)
+            time.sleep(5)
 
         return all_talk_links
 
@@ -218,7 +219,7 @@ class TEDScraper:
         page_list.append(target_url)
 
         while True:
-            # print("[DEBUG] target_url: {}".format(target_url))
+            print("[DEBUG] target_url: {}".format(target_url))
             ta_soup = TEDScraper.make_soup(target_url)
             next_link = self.get_next_talk_list_a(ta_soup)
 
@@ -249,7 +250,7 @@ class TEDScraper:
         next_link = next_link_a.attrs['href']
         next_link = urljoin(TEDScraper.BASE_URL, next_link)
 
-        # print("next page url: {}".format(next_link))
+        print("next page url: {}".format(next_link))
 
         return next_link
 
@@ -264,14 +265,15 @@ class TEDScraper:
         talk_topics_items = self._find_talk_topics(ta_soup)
         # print("[DEBUG] Now TEDScraper get_talk_topics() talk_topics_items = {}".format(talk_topics_items))
 
-        topic_list = []
-        for tti in talk_topics_items:
-            topic = tti.find("a")
+        # topic_list = []
+        # for tti in talk_topics_items:
+        #     topic = tti.find("a")
 
-            if topic is not None:
-                topic = topic.get_text().strip()
-                # print("[DEBUG] Now TEDScraper get_talk_topics() topic = {}".format(topic))
-                topic_list.append(topic)
+        #     if topic is not None:
+        #         topic = topic.get_text().strip()
+        #         print("[DEBUG] Now TEDScraper get_talk_topics() topic = {}".format(topic))
+        #         topic_list.append(topic)
+        topic_list = talk_topics_items
 
         return topic_list
 
@@ -290,10 +292,10 @@ class TEDScraper:
                 ta_soup = TEDScraper.make_soup(atl)
                 topic_list = self.get_talk_topics(ta_soup)
 
-                # print("[DEBUG] get_all_talk_topics()\nTopic List: {}".format(topic_list))
+                print("[DEBUG] get_all_talk_topics()\nTopic List: {}".format(topic_list))
 
                 all_talk_topics.append(topic_list)
-                # time.sleep(1)
+                time.sleep(5)
 
         return all_talk_topics
 
@@ -338,11 +340,11 @@ class TEDScraper:
                 time_list = self.get_talk_transcript_time(tr_soup)
 
                 all_talk_transcript_time.append(time_list)
-                # time.sleep(1)
+                time.sleep(5)
 
         return all_talk_transcript_time
 
-    def get_talk_transcrpit(self, tr_soup):
+    def get_talk_transcript(self, tr_soup):
         """
         Get the transcript of the target talk
 
@@ -350,13 +352,13 @@ class TEDScraper:
         :rtype: list
         """
         talk_transcript_para = self._find_transcript_para(tr_soup)
-        # print("[DEBUG] get_talk_transcript()\n Transcript Para: {}".format(talk_transcript_para))
+        print("[DEBUG] get_talk_transcript()\n Transcript Para: {}".format(talk_transcript_para))
 
         paragraph_list = []
         for ttp in talk_transcript_para:
             tt = self._find_transcript_text(ttp)
             transcript_text = self._format_string(tt)
-            # print("[DEBUG] get_talk_transcript()\n Transcript Text: {}".formattranscript_text)
+            print("[DEBUG] get_talk_transcript()\n Transcript Text: {}".formattranscript_text)
             paragraph_list.append(transcript_text)
 
         return paragraph_list
@@ -375,12 +377,12 @@ class TEDScraper:
                 self.target_url = tr_url
 
                 tr_soup = TEDScraper.make_soup(tr_url)
-                paragraph_list = self.get_talk_transcrpit(tr_soup)
+                paragraph_list = self.get_talk_transcript(tr_soup)
 
-                # print("[DEBUG] get_all_talk_transcripts()\nPara List: {}\n".format(paragraph_list))
+                print("[DEBUG] get_all_talk_transcripts()\nPara List: {}\n".format(paragraph_list))
 
                 all_talk_transcripts.append(paragraph_list)
-                # time.sleep(1)
+                time.sleep(5)
 
         return all_talk_transcripts
 
@@ -408,16 +410,16 @@ class TEDScraper:
             tr_url = TEDScraper.get_transcript_url(ta_url, al)
             print(
                 "                  [{:3}/{:3}] target language: {}".format(i + 1, lang_num, al))
-            # print("[DEBUG] in get_all_language_transcript()")
-            # print("[DEBUG] symbol: {:5} URL: {}\n".format(al, t_url))
+            print("[DEBUG] in get_all_language_transcript()")
+            print("[DEBUG] symbol: {:5} URL: {}\n".format(al, t_url))
 
             tr_soup = TEDScraper.make_soup(tr_url)
             if tr_soup is not None:
-                t_dict[al] = self.get_talk_transcrpit(tr_soup)
+                t_dict[al] = self.get_talk_transcript(tr_soup)
 
-                # [DEBUG] dump json file
-                # with open("./dump_files/talk_info_al" + str(num) + ".json", "w") as f:
-                #     json.dump(t_dict, f, indent=2)
+                print("[DEBUG] dump json file")
+                with open("./dump_files/talk_info_al" + str(num) + ".json", "w") as f:
+                    json.dump(t_dict, f, indent=2)
 
         return t_dict
 
@@ -494,12 +496,13 @@ class TEDScraper:
             print("          Target transcript URL: {}".format(tr_url))
             tr_soup = TEDScraper.make_soup(tr_url)
 
-            talk_transcript.append(self.get_talk_transcrpit(tr_soup))
+            talk_transcript.append(self.get_talk_transcript(tr_soup))
             print("            [ GET ] get transcript time")
             transcript_time.append(self.get_talk_transcript_time(tr_soup))
 
         # dump talk info
         print("[ DUMP ] dump talk info ...")
+        print(list(zip(talk_date, talk_titles, talk_links, talk_topics, talk_transcript, transcript_time)))
         for date, title, link, topics, transcript, t_time in zip(talk_date, talk_titles, talk_links, talk_topics, talk_transcript, transcript_time):
             talk_info = {
                 "posted_date": date,
@@ -685,8 +688,10 @@ class TEDScraper:
         :param bs4.BeautifulSoup soup:
         :rtype: bs4.element.ResultSet
         """
-        talk_topics_div = soup.find("div", {"class", "talk-topics"})
-        return talk_topics_div.find_all("li", {"class": "talk-topics__item"})
+        # talk_topics_div = soup.find("div", {"class", "talk-topics"})
+        # return talk_topics_div.find_all("li", {"class": "talk-topics__item"})
+        talk_topics_div = soup.find_all("meta", {"property": "og:video:tag"})
+        return [topic.get('content') for topic in talk_topics_div]
 
     def _find_transcript_para(self, soup):
         """
